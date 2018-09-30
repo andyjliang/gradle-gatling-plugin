@@ -41,7 +41,6 @@ class GatlingPluginTest extends GatlingUnitSpec {
         project.gatling { scalaVersion = '2.11.3' }
         and:
         project.evaluate()
-
         then:
         project.configurations.getByName("gatlingCompile").allDependencies.find {
             it.name == "scala-library" && it.version == "2.11.3"
@@ -57,10 +56,8 @@ class GatlingPluginTest extends GatlingUnitSpec {
         }
     }
 
-    def "should create processGatlingResources task"() {
+    def "should create gatlingInit task"() {
         expect:
-        project.tasks.getByName("processGatlingResources") != null
-        and:
-        project.tasks.getByName("processGatlingResources").actions.find { it.action instanceof LogbackConfigTaskAction }
+        project.tasks.getByName("gatlingInit") != null
     }
 }
