@@ -1,8 +1,8 @@
 package unit
 
+import com.github.lkishalmi.gradle.gatling.GatlingInitTask
 import com.github.lkishalmi.gradle.gatling.GatlingPluginExtension
 import com.github.lkishalmi.gradle.gatling.GatlingRunTask
-import com.github.lkishalmi.gradle.gatling.LogbackConfigTaskAction
 import helper.GatlingUnitSpec
 
 class GatlingPluginTest extends GatlingUnitSpec {
@@ -59,5 +59,7 @@ class GatlingPluginTest extends GatlingUnitSpec {
     def "should create gatlingInit task"() {
         expect:
         project.tasks.getByName("gatlingInit") != null
+        and:
+        project.tasks.getByName("gatlingInit") instanceof GatlingInitTask
     }
 }

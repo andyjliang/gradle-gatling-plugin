@@ -9,12 +9,48 @@ abstract class GatlingFuncSpec extends GatlingSpec {
     static def GATLING_HOST_NAME_SYS_PROP = "-Dgatling.hostName=HTTP://COMPUTER-DATABASE.GATLING.IO"
 
     @Shared
+    def pluginVersion = System.getProperty("com.github.lkishalmi.gatling.version")
+
+    @Shared
     List<File> pluginClasspath
 
     def setupSpec() {
+        assert pluginVersion != null : "Provide plugin version via `-Dcom.github.lkishalmi.gatling.version=`"
+
         def current = getClass().getResource("/").file
         pluginClasspath = [current.replace("classes/test", "classes/main"),
                            current.replace("classes/test", "resources/main")].collect { new File(it) }
+    }
+
+    def generateBuildScripts() {
+        testProjectDir.newFile("build.gradle") << """
+plugins {
+    id 'com.github.lkishalmi.gatling' version '$pluginVersion'
+}
+repositories {
+    jcenter()
+}
+dependencies {
+    gatling group: 'commons-lang', name: 'commons-lang', version: '2.6'
+}
+"""
+
+        testProjectDir.newFile("settings.gradle") << """
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == 'com.github.lkishalmi') {
+                useModule('com.github.lkishalmi.gatling:gradle-gatling-plugin:$pluginVersion')
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "${new File(System.getProperty("user.home"), ".m2/repository").toURI()}"
+        }
+    }
+}
+"""
     }
 
     File prepareTest(boolean copyFiles = true) {
