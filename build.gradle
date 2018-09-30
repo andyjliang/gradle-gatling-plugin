@@ -13,11 +13,11 @@ repositories {
 }
 
 dependencies {
-    compile 'commons-io:commons-io:2.5'
     testCompile gradleTestKit()
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
         exclude module: 'groovy-all'
     }
+    testCompile 'commons-io:commons-io:2.5'
 }
 
 test {

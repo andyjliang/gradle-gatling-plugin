@@ -3,6 +3,7 @@ package functional
 import helper.GatlingFuncSpec
 import org.gradle.testkit.runner.BuildResult
 import spock.lang.Ignore
+import spock.lang.IgnoreRest
 import spock.lang.Unroll
 
 import static com.github.lkishalmi.gradle.gatling.GatlingPlugin.GATLING_RUN_TASK_NAME
@@ -26,7 +27,7 @@ class WhenRunSimulationSpec extends GatlingFuncSpec {
         !result.output.split().any { it.contains("INFO") }
     }
 
-    def "should execute only #simulation when initiated by rule"() {
+    def "should execute only single simulation when initiated by rule"() {
         setup:
         prepareTest()
         when:
@@ -62,12 +63,32 @@ gatling {
         prepareTest(false)
         when:
         BuildResult result = executeGradle(GATLING_RUN_TASK_NAME)
-        then: "default tasks were executed succesfully"
+        then: "default tasks were executed successfully"
         result.task(":$GATLING_RUN_TASK_NAME").outcome == SUCCESS
         result.task(":gatlingClasses").outcome == UP_TO_DATE
         and: "no simulations compiled"
         !new File(testProjectBuildDir, "classes/gatling").exists()
         and: "no simulations run"
         !new File(testProjectBuildDir, "reports/gatling").exists()
+    }
+
+    @IgnoreRest
+    def "should run simulations from sample project"() {
+        setup:
+        prepareTest(false)
+        when:
+        BuildResult result = executeGradle("gatlingInit")
+        then:
+        result.task(":gatlingInit").outcome == SUCCESS
+        and:
+        new File(testProjectDir.root, "src/gatling").exists()
+
+        when:
+        result = executeGradle(GATLING_RUN_TASK_NAME)
+        then:
+        result.task(":$GATLING_RUN_TASK_NAME").outcome == SUCCESS
+        and: "all simulations were run"
+        def reports = new File(testProjectBuildDir, "reports/gatling")
+        reports.exists() && reports.listFiles().size() == 1
     }
 }
